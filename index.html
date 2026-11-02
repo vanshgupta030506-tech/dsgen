@@ -895,43 +895,8 @@
         font-size: 18px;
       }
 
-      .google-sign-in {
-        width: 100%;
-        min-height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 11px;
-        border: 1px solid #dcded7;
-        border-radius: 7px;
-        background: white;
-        color: var(--ink);
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 600;
-        transition:
-          border-color 160ms ease,
-          transform 160ms ease;
-      }
-
-      .google-sign-in:hover {
-        transform: translateY(-1px);
-        border-color: #aeb49f;
-      }
-
-      .google-sign-in:disabled {
-        cursor: wait;
-        opacity: 0.65;
-      }
-
-      .google-g {
-        font-family: var(--font-display);
-        font-size: 17px;
-        font-weight: 800;
-        background: conic-gradient(from -45deg, #4285f4 0 25%, #34a853 25% 48%, #fbbc05 48% 72%, #ea4335 72% 88%, #4285f4 88%);
-        background-clip: text;
-        color: transparent;
-        -webkit-background-clip: text;
+      .google-button-container {
+        min-height: 44px;
       }
 
       .auth-feedback {
@@ -1345,10 +1310,7 @@
       <p class="auth-dialog-copy" id="auth-description">
         Sign in securely with Google. Your account profile will be saved to your private Forma space.
       </p>
-      <button class="google-sign-in" id="google-sign-in" type="button">
-        <span class="google-g" aria-hidden="true">G</span>
-        <span>Continue with Google</span>
-      </button>
+      <div class="google-button-container" id="google-button-container"></div>
       <div class="account-panel" id="account-panel" hidden>
         <div class="account-label">Signed in as</div>
         <div class="account-name" id="account-name"></div>
@@ -1357,87 +1319,163 @@
       <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
     </dialog>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-      import {
-        GoogleAuthProvider,
-        getAuth,
-        onAuthStateChanged,
-        signInWithPopup,
-        signOut,
-      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-      import {
-        getDatabase,
-        ref,
-        serverTimestamp,
-        update,
-      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyBnUUpNbCGP6ngB8RAb85Y47YoKm3Ji3BA",
-        authDomain: "dsgen-8cf88.firebaseapp.com",
-        databaseURL: "https://dsgen-8cf88-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "dsgen-8cf88",
-        storageBucket: "dsgen-8cf88.firebasestorage.app",
-        messagingSenderId: "560318140607",
-        appId: "1:560318140607:web:494b3cf2dc99cd0dac760a",
-        measurementId: "G-09W3FB0S3R",
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const database = getDatabase(app);
-      const googleProvider = new GoogleAuthProvider();
+    <script>
       const dialog = document.querySelector("#auth-dialog");
-      const signInButton = document.querySelector("#google-sign-in");
+      const googleButtonContainer = document.querySelector("#google-button-container");
       const accountPanel = document.querySelector("#account-panel");
       const accountName = document.querySelector("#account-name");
       const signOutButton = document.querySelector("#sign-out");
       const feedback = document.querySelector("#auth-feedback");
+      let googleIdentityReady;
+      let googleButtonRendered = false;
+      let googleButtonLoading = false;
+      let currentUser = null;
 
       function setFeedback(message, isError = false) {
         feedback.textContent = message;
         feedback.dataset.error = String(isError);
       }
 
-      function getErrorCode(error) {
-        if (error && typeof error === "object" && "code" in error) {
-          return String(error.code);
-        }
-        return "unknown";
-      }
-
-      function getErrorMessage(error, action) {
-        const code = getErrorCode(error);
-        const messages = {
-          "auth/popup-closed-by-user": "Google sign-in was closed before it finished.",
-          "auth/popup-blocked": "Your browser blocked the sign-in popup. Allow pop-ups and try again.",
-          "auth/unauthorized-domain": "This site is not authorized in Firebase Authentication. Add its domain under Authorized domains.",
-          "auth/operation-not-allowed": "Google sign-in is not enabled for this Firebase project.",
-          "database/permission-denied": "Your account is signed in, but Firebase denied the profile write. Check the Realtime Database rules in the README.",
-        };
-        if (code.toLowerCase().includes("permission_denied")) {
-          return "Your account is signed in, but Firebase denied the profile write. Check the Realtime Database rules in the README.";
-        }
-        return messages[code] ?? `${action} failed (${code}). Check the browser console for details.`;
-      }
-
       function showAccount(user) {
-        const accountText = user.displayName || user.email || "Google account";
-        accountName.textContent = accountText;
+        currentUser = user;
+        accountName.textContent = user.name || user.email || "Google account";
         accountPanel.hidden = false;
-        signInButton.hidden = true;
+        googleButtonContainer.hidden = true;
       }
 
       function showSignedOut() {
+        currentUser = null;
         accountPanel.hidden = true;
-        signInButton.hidden = false;
+        googleButtonContainer.hidden = false;
         accountName.textContent = "";
         setFeedback("");
       }
 
+      async function readResponse(response) {
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error(`The server returned an invalid response (${response.status}).`);
+        }
+        if (!response.ok) {
+          throw new Error(result.error || `Request failed (${response.status}).`);
+        }
+        return result;
+      }
+
+      async function loadSession() {
+        const response = await fetch("/api/auth/session", {
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
+        const result = await readResponse(response);
+        if (result.user) {
+          showAccount(result.user);
+        } else {
+          showSignedOut();
+        }
+      }
+
+      function loadGoogleIdentity() {
+        if (window.google?.accounts?.id) {
+          return Promise.resolve();
+        }
+        if (!googleIdentityReady) {
+          googleIdentityReady = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://accounts.google.com/gsi/client";
+            script.async = true;
+            script.onload = () => {
+              if (window.google?.accounts?.id) {
+                resolve();
+              } else {
+                reject(new Error("Google sign-in could not be initialized."));
+              }
+            };
+            script.onerror = () => reject(new Error("Google sign-in could not be loaded."));
+            document.head.append(script);
+          });
+        }
+        return googleIdentityReady;
+      }
+
+      async function handleGoogleCredential(credential) {
+        setFeedback("Verifying your Google account…");
+        try {
+          const response = await fetch("/api/auth/google", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ credential }),
+          });
+          await readResponse(response);
+          await loadSession();
+          setFeedback("You're signed in and your profile is synced.");
+        } catch (error) {
+          console.error("Google sign-in failed.", error);
+          setFeedback(error.message || "Google sign-in failed. Please try again.", true);
+        }
+      }
+
+      async function initializeGoogleButton() {
+        if (googleButtonRendered || googleButtonLoading || currentUser || !dialog.open) {
+          return;
+        }
+        googleButtonLoading = true;
+        setFeedback("Loading secure sign-in…");
+        try {
+          const [configResponse] = await Promise.all([
+            fetch("/api/config", { headers: { Accept: "application/json" } }),
+            loadGoogleIdentity(),
+          ]);
+          const config = await readResponse(configResponse);
+          if (!dialog.open) {
+            return;
+          }
+          if (!config.googleClientId) {
+            throw new Error("Google sign-in is not configured on the server.");
+          }
+          window.google.accounts.id.initialize({
+            client_id: config.googleClientId,
+            callback: ({ credential }) => {
+              if (credential) {
+                void handleGoogleCredential(credential);
+              } else {
+                setFeedback("Google did not return a sign-in credential. Please try again.", true);
+              }
+            },
+          });
+          window.google.accounts.id.renderButton(googleButtonContainer, {
+            theme: "outline",
+            size: "large",
+            text: "continue_with",
+            shape: "rectangular",
+            width: Math.min(googleButtonContainer.clientWidth, 378),
+          });
+          googleButtonRendered = true;
+          setFeedback("");
+        } catch (error) {
+          console.error("Google sign-in setup failed.", error);
+          setFeedback(error.message || "Google sign-in could not be loaded.", true);
+        } finally {
+          googleButtonLoading = false;
+        }
+      }
+
       document.querySelectorAll("[data-auth-trigger]").forEach((button) => {
-        button.addEventListener("click", () => dialog.showModal());
+        button.addEventListener("click", () => {
+          dialog.showModal();
+          void loadSession()
+            .then(initializeGoogleButton)
+            .catch((error) => {
+              console.error("Authentication status could not be loaded.", error);
+              setFeedback(error.message || "Authentication is temporarily unavailable.", true);
+            });
+        });
       });
 
       document.querySelector("#auth-close").addEventListener("click", () => dialog.close());
@@ -1448,61 +1486,28 @@
         }
       });
 
-      signInButton.addEventListener("click", async () => {
-        signInButton.disabled = true;
-        setFeedback("Connecting to Google…");
-        try {
-          googleProvider.setCustomParameters({ prompt: "select_account" });
-          await signInWithPopup(auth, googleProvider);
-        } catch (error) {
-          console.error("Google sign-in failed.", error);
-          setFeedback(getErrorMessage(error, "Google sign-in"), true);
-        } finally {
-          signInButton.disabled = false;
-        }
-      });
-
       signOutButton.addEventListener("click", async () => {
         signOutButton.disabled = true;
         try {
-          await signOut(auth);
+          const response = await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+          });
+          await readResponse(response);
+          showSignedOut();
           dialog.close();
         } catch (error) {
           console.error("Sign-out failed.", error);
-          setFeedback(getErrorMessage(error, "Sign-out"), true);
+          setFeedback(error.message || "Sign-out failed. Please try again.", true);
         } finally {
           signOutButton.disabled = false;
         }
       });
 
-      onAuthStateChanged(
-        auth,
-        async (user) => {
-          if (!user) {
-            showSignedOut();
-            return;
-          }
-
-          showAccount(user);
-          setFeedback("Signed in. Syncing your profile…");
-          try {
-            await update(ref(database, `users/${user.uid}`), {
-              displayName: user.displayName ?? "",
-              email: user.email ?? "",
-              photoURL: user.photoURL ?? "",
-              updatedAt: serverTimestamp(),
-            });
-            setFeedback("You're signed in and your profile is synced.");
-          } catch (error) {
-            console.error("Firebase profile sync failed.", error);
-            setFeedback(getErrorMessage(error, "Profile sync"), true);
-          }
-        },
-        (error) => {
-          console.error("Firebase authentication state could not be loaded.", error);
-          setFeedback(getErrorMessage(error, "Authentication state"), true);
-        },
-      );
+      void loadSession().catch((error) => {
+        console.error("Authentication status could not be loaded.", error);
+      });
     </script>
   </body>
 </html>

@@ -3,70 +3,68 @@
 A responsive landing page for a design-system builder that helps designers create
 tokens and components, then bring their system into Figma.
 
-## Sign in and Firebase
+## Server-side sign in and Firebase
 
-The sign-in flow uses Firebase Authentication with Google and stores the signed-in
-user's display name, email, photo URL, and update timestamp at
-`users/{uid}` in Firebase Realtime Database. The web app configuration in
-`index.html`, including its Firebase API key, is public client configuration.
-Firebase documents these keys as public project identifiers, not credentials
-that authorize database access. Google sign-in needs the configuration in the
-browser, so moving it to another frontend file or a Vercel environment variable
-would not make it secret. Never put service-account keys, private keys, or other
-server credentials in the page.
+Google Identity Services returns a Google ID token to the browser. The browser
+sends it to `/api/auth/google`; the Vercel Function exchanges it with Firebase
+Authentication, saves the profile to Realtime Database using Firebase Admin,
+and creates a five-day `HttpOnly`, `SameSite=Lax` session cookie. Session
+verification and sign-out also happen through same-origin API functions.
 
-### Lock down the Firebase project
+The Firebase Web API key and service-account credential are no longer included in
+`index.html` or browser JavaScript. The Google OAuth client ID is returned by
+`/api/config`; OAuth client IDs are public identifiers, not secrets.
 
-1. In Google Cloud Console → APIs & Services → Credentials, find the
-   Firebase-provisioned browser key used by this app. Verify its API restrictions
-   allow only the Firebase APIs required by this project. Firebase normally
-   manages that allowlist; do not replace it with a guessed list, as that can
-   break sign-in or database access. Keep unrelated Google APIs off this key.
-2. If applying website (HTTP referrer) restrictions, allow only the domains you
-   use, such as `https://dsgen.vercel.app/*` and (for local development)
-   `http://localhost:8000/*`. Add other Vercel preview domains only if you
-   actually use them. Referrer restrictions limit where the key is used; they
-   do not authorize or protect database data.
-3. In Firebase Console → Realtime Database → Rules, publish rules equivalent to:
+### Configure Vercel
+
+Add these environment variables in the Vercel project settings for each
+deployment environment:
+
+| Variable | Value |
+| --- | --- |
+| `APP_ORIGIN` | Exact origin, e.g. `https://dsgen.vercel.app` (no trailing slash) |
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web client ID configured for the Firebase Google provider |
+| `FIREBASE_WEB_API_KEY` | Firebase Web API key for the `dsgen-8cf88` project |
+| `FIREBASE_DATABASE_URL` | `https://dsgen-8cf88-default-rtdb.asia-southeast1.firebasedatabase.app` |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Full JSON for a service account belonging to the Firebase project |
+
+Keep the service-account JSON private: enter it only in Vercel's encrypted
+environment-variable settings. Do not commit it, put it in `index.html`, or paste
+it into chat. Grant the service account only the permissions the app needs.
+
+The Firebase Web API key is now used only by the server-side token exchange. Keep
+its API restrictions limited to the Firebase APIs needed by the project. Do not
+add HTTP referrer restrictions to this key: the exchange is a server-to-server
+request and has no browser referrer, so that restriction can break sign-in. This
+key identifies the Firebase project; it does not grant database access.
+
+In Google Cloud Console, configure the OAuth web client with the production
+JavaScript origin `https://dsgen.vercel.app`. Add `http://localhost:8000` as an
+origin when testing locally. In Firebase Authentication, enable Google and add
+the production domain and `localhost` to Authorized domains.
+
+Because only the server uses Firebase Admin, Realtime Database rules should deny
+all direct client access. Admin SDK operations run with server credentials and
+bypass these rules:
 
 ```json
 {
   "rules": {
-    "users": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
-      }
-    }
+    ".read": false,
+    ".write": false
   }
 }
 ```
 
-These rules let each signed-in user read or update only their own profile. Check
-that no broader root-level rule grants public read/write access; broader rules
-override narrower ones. Do not use public read/write rules.
+### Run locally
 
-4. Configure Firebase App Check for the web app and Realtime Database. Start in
-   monitoring mode, integrate the selected web provider in the client, verify
-   legitimate requests, then enforce it in Firebase Console. Enforcing before
-   the client is configured can block the app.
-
-In Firebase Authentication, enable Google as a sign-in provider and add the
-production domain to Authorized domains. To test locally, add `localhost` there.
-
-Firebase documents its API key guidance at
-[Firebase API keys](https://firebase.google.com/docs/projects/api-keys), and
-Realtime Database authorization at
-[Database security rules](https://firebase.google.com/docs/database/security).
-
-## Run locally
-
-Serve the page over HTTP so Firebase Authentication can complete its redirect and
-popup flow:
+Install Node.js 20 or later and the dependencies, then run the Vercel development
+server (not a static file server, because sign-in needs the API functions):
 
 ```sh
-python3 -m http.server 8000
+npm install
+npx vercel dev
 ```
 
-Then open `http://localhost:8000`. The page uses Firebase's browser SDK from
-Google's CDN and does not require a build step or package installation.
+Set the environment variables above in Vercel or a local `.env.local` file before
+testing. `.env.local` is git-ignored; never commit credentials.
