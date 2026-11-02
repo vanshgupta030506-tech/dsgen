@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Build a thoughtful design system in minutes. Shape your tokens, preview your components, and bring it all into Figma with Forma."
+    />
+    <meta name="theme-color" content="#f7f6f2" />
+    <title>Forma — Your design system, in good form.</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+      :root {
+        color-scheme: light;
+        --paper: #f7f6f2;
+        --ink: #1d211e;
+        --muted: #777a73;
+        --line: #e6e5df;
+        --lime: #d7f26a;
+        --green: #304c38;
+        --font-body: "DM Sans", sans-serif;
+        --font-display: "Manrope", sans-serif;
+        --font-mono: "DM Mono", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .shell {
+        width: min(1200px, calc(100% - 64px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-display);
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: -0.07em;
+      }
+
+      .brand-mark {
+        width: 27px;
+        height: 27px;
+        display: grid;
+        place-items: center;
+        background: var(--ink);
+        border-radius: 8px;
+        color: var(--lime);
+        font-size: 17px;
+        line-height: 1;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 34px;
+        margin-left: 52px;
+        color: #5f625d;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .nav-links a,
+      .text-link {
+        transition: color 160ms ease;
+      }
+
+      .nav-links a:hover,
+      .text-link:hover {
+        color: var(--ink);
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 23px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .nav-right .text-link {
+        color: #5f625d;
+      }
+
+      .button {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0 18px;
+        border: 1px solid var(--ink);
+        border-radius: 7px;
+        background: var(--ink);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        transition:
+          transform 160ms ease,
+          background 160ms ease,
+          color 160ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        background: var(--green);
+      }
+
+      .button .arrow {
+        font-size: 17px;
+        font-weight: 400;
+      }
+
+      .hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: 0.94fr 1.06fr;
+        align-items: center;
+        gap: 44px;
+        min-height: 640px;
+        padding: 59px 0 75px;
+      }
+
+      .hero-copy {
+        position: relative;
+        z-index: 1;
+        padding-bottom: 10px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 23px;
+        color: #61675c;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.075em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #89a933;
+        box-shadow: 0 0 0 4px #e8efcf;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 580px;
+        margin-bottom: 23px;
+        font-family: var(--font-display);
+        font-size: clamp(48px, 6vw, 75px);
+        font-weight: 600;
+        letter-spacing: -0.075em;
+        line-height: 0.99;
+      }
+
+      h1 em {
+        color: #778844;
+        font-style: normal;
+      }
+
+      .hero-description {
+        max-width: 430px;
+        margin-bottom: 29px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 19px;
+      }
+
+      .hero-actions .button {
+        min-height: 49px;
+        padding: 0 20px;
+      }
+
+      .quiet-link {
+        color: #5f625d;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .quiet-link span {
+        padding-left: 4px;
+        font-size: 16px;
+      }
+
+      .social-proof {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 43px;
+        color: #777a73;
+        font-size: 11px;
+      }
+
+      .avatars {
+        display: flex;
+        padding-left: 4px;
+      }
+
+      .avatar {
+        width: 25px;
+        height: 25px;
+        display: grid;
+        place-items: center;
+        margin-left: -4px;
+        border: 2px solid var(--paper);
+        border-radius: 50%;
+        color: #42463f;
+        font-family: var(--font-mono);
+        font-size: 8px;
+      }
+
+      .avatar:nth-child(1) {
+        background: #e8c1a6;
+      }
+
+      .avatar:nth-child(2) {
+        background: #d1d9a8;
+      }
+
+      .avatar:nth-child(3) {
+        background: #c4d2e4;
+      }
+
+      .avatar:nth-child(4) {
+        background: #e7c4c0;
+      }
+
+      .social-proof strong {
+        color: #42463f;
+        font-weight: 600;
+      }
+
+      .product-stage {
+        position: relative;
+        min-width: 0;
+        padding: 19px 6px 26px 0;
+      }
+
+      .stage-glow {
+        position: absolute;
+        top: 8%;
+        right: 0;
+        width: 85%;
+        height: 78%;
+        border-radius: 50%;
+        background: #e9eddc;
+        filter: blur(40px);
+      }
+
+      .app-window {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e3e3dc;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow:
+          0 28px 80px #343c2917,
+          0 3px 8px #343c2908;
+        transform: rotate(1.2deg);
+      }
+
+      .window-bar {
+        height: 39px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        border-bottom: 1px solid #ededeb;
+        color: #92958f;
+        font-family: var(--font-mono);
+        font-size: 9px;
+      }
+
+      .window-dots {
+        display: flex;
+        gap: 5px;
+      }
+
+      .window-dots i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #e7e7e1;
+      }
+
+      .window-dots i:first-child {
+        background: #d9e3b2;
+      }
+
+      .window-content {
+        display: grid;
+        grid-template-columns: 137px 1fr;
+        min-height: 390px;
+      }
+
+      .sidebar {
+        padding: 19px 11px;
+        border-right: 1px solid #ededeb;
+        background: #fcfcfa;
+      }
+
+      .sidebar-label {
+        padding: 0 8px;
+        color: #a0a29b;
+        font-family: var(--font-mono);
+        font-size: 8px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .side-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 9px;
+        padding: 8px;
+        border-radius: 5px;
+        color: #777a73;
+        font-size: 9px;
+      }
+
+      .side-item.active {
+        background: #edf2e2;
+        color: #3e5030;
+        font-weight: 600;
+      }
+
+      .side-icon {
+        width: 13px;
+        height: 13px;
+        display: grid;
+        place-items: center;
+        border: 1px solid currentColor;
+        border-radius: 3px;
+        font-size: 8px;
+      }
+
+      .workspace {
+        min-width: 0;
+        padding: 22px 23px 24px;
+      }
+
+      .workspace-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .workspace-heading h3 {
+        margin-bottom: 5px;
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+      }
+
+      .workspace-heading p {
+        margin-bottom: 0;
+        color: #989b94;
+        font-size: 8px;
+      }
+
+      .tiny-button {
+        padding: 7px 9px;
+        border-radius: 4px;
+        background: var(--ink);
+        color: white;
+        font-size: 8px;
+      }
+
+      .palette-label {
+        margin-bottom: 9px;
+        color: #6f726c;
+        font-size: 8px;
+        font-weight: 600;
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 7px;
+        margin-bottom: 21px;
+      }
+
+      .swatch {
+        min-width: 0;
+      }
+
+      .swatch-color {
+        height: 43px;
+        margin-bottom: 5px;
+        border: 1px solid #1616160d;
+        border-radius: 4px;
+      }
+
+      .swatch span {
+        color: #8d9089;
+        font-family: var(--font-mono);
+        font-size: 7px;
+      }
+
+      .components-heading {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 9px;
+        color: #6f726c;
+        font-size: 8px;
+        font-weight: 600;
+      }
+
+      .components-heading span:last-child {
+        color: #a0a29b;
+        font-weight: 400;
+      }
+
+      .component-preview {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        padding: 13px;
+        border: 1px solid #efefeb;
+        border-radius: 6px;
+        background: #fdfdfb;
+      }
+
+      .preview-card {
+        padding: 10px;
+        border: 1px solid #ecece7;
+        border-radius: 5px;
+        background: white;
+      }
+
+      .preview-pill {
+        width: 33px;
+        height: 8px;
+        margin-bottom: 9px;
+        border-radius: 4px;
+        background: #edf2e2;
+      }
+
+      .skeleton-line {
+        height: 5px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        background: #eeefeb;
+      }
+
+      .skeleton-line.short {
+        width: 60%;
+        margin-bottom: 10px;
+      }
+
+      .preview-button {
+        display: inline-block;
+        padding: 5px 8px;
+        border-radius: 3px;
+        background: var(--ink);
+        color: white;
+        font-size: 7px;
+      }
+
+      .type-sample {
+        padding: 4px 1px;
+      }
+
+      .type-sample strong {
+        display: block;
+        margin-bottom: 5px;
+        font-family: var(--font-display);
+        font-size: 15px;
+        letter-spacing: -0.07em;
+      }
+
+      .type-sample span {
+        color: #8d9089;
+        font-size: 7px;
+      }
+
+      .floating-note {
+        position: absolute;
+        right: -17px;
+        bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        border: 1px solid #edeee7;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 8px 26px #343c2914;
+        font-size: 9px;
+        transform: rotate(-2deg);
+      }
+
+      .figma-mark {
+        width: 18px;
+        height: 25px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .figma-mark span {
+        height: 8px;
+        border-radius: 5px;
+        background: #f16b5c;
+      }
+
+      .figma-mark span:nth-child(2) {
+        background: #a56bf1;
+      }
+
+      .figma-mark span:nth-child(3) {
+        width: 9px;
+        background: #52b79b;
+      }
+
+      .floating-note strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 9px;
+      }
+
+      .floating-note small {
+        color: #8b8d87;
+        font-size: 8px;
+      }
+
+      .ticker {
+        overflow: hidden;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .ticker-inner {
+        min-height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        color: #85877f;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .ticker-inner .star {
+        color: #9baa70;
+        font-size: 14px;
+      }
+
+      .section {
+        padding: 110px 0;
+      }
+
+      .section-intro {
+        max-width: 570px;
+        margin-bottom: 47px;
+      }
+
+      .section-kicker {
+        margin-bottom: 14px;
+        color: #7f8e54;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin-bottom: 15px;
+        font-family: var(--font-display);
+        font-size: clamp(35px, 4vw, 48px);
+        font-weight: 600;
+        letter-spacing: -0.07em;
+        line-height: 1.06;
+      }
+
+      .section-intro p,
+      .feature-copy p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 13px;
+      }
+
+      .feature-card {
+        min-height: 242px;
+        padding: 25px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: #fbfaf7;
+      }
+
+      .feature-icon {
+        width: 35px;
+        height: 35px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 31px;
+        border: 1px solid #e1e4d7;
+        border-radius: 8px;
+        background: #eff2e7;
+        color: #5b6b3b;
+        font-size: 16px;
+      }
+
+      .feature-card h3 {
+        margin-bottom: 9px;
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+      }
+
+      .feature-card p {
+        max-width: 290px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .workflow {
+        display: grid;
+        grid-template-columns: 0.85fr 1.15fr;
+        align-items: center;
+        gap: 85px;
+        padding: 80px 0 105px;
+        border-top: 1px solid var(--line);
+      }
+
+      .workflow .section-intro {
+        margin-bottom: 0;
+      }
+
+      .steps {
+        display: grid;
+        gap: 0;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 39px 1fr;
+        gap: 15px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .step:first-child {
+        padding-top: 0;
+      }
+
+      .step-number {
+        color: #8c9969;
+        font-family: var(--font-mono);
+        font-size: 10px;
+      }
+
+      .step h3 {
+        margin-bottom: 5px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .step p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .cta-panel {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+        min-height: 250px;
+        margin-bottom: 34px;
+        padding: 48px 57px;
+        border-radius: 12px;
+        background: #e9eddc;
+      }
+
+      .cta-panel::after {
+        position: absolute;
+        top: -100px;
+        right: 15%;
+        width: 320px;
+        height: 320px;
+        border: 1px solid #d6ddc1;
+        border-radius: 50%;
+        content: "";
+      }
+
+      .cta-panel::before {
+        position: absolute;
+        top: -61px;
+        right: calc(15% + 39px);
+        width: 240px;
+        height: 240px;
+        border: 1px solid #d6ddc1;
+        border-radius: 50%;
+        content: "";
+      }
+
+      .cta-copy {
+        position: relative;
+        z-index: 1;
+        max-width: 510px;
+      }
+
+      .cta-copy h2 {
+        margin-bottom: 10px;
+        font-size: clamp(32px, 4vw, 44px);
+      }
+
+      .cta-copy p {
+        margin-bottom: 0;
+        color: #73796a;
+        font-size: 14px;
+      }
+
+      .cta-panel .button {
+        position: relative;
+        z-index: 1;
+        flex: 0 0 auto;
+        min-height: 49px;
+      }
+
+      .footer {
+        min-height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        color: #888a83;
+        font-size: 11px;
+      }
+
+      .footer .brand {
+        color: var(--ink);
+        font-size: 16px;
+      }
+
+      .footer .brand-mark {
+        width: 23px;
+        height: 23px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 23px;
+      }
+
+      .footer-links a:hover {
+        color: var(--ink);
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          min-height: 580px;
+        }
+
+        h1 {
+          font-size: clamp(46px, 7vw, 65px);
+        }
+
+        .window-content {
+          grid-template-columns: 110px 1fr;
+        }
+
+        .workspace {
+          padding: 20px 16px;
+        }
+
+        .workflow {
+          gap: 45px;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          width: min(100% - 38px, 520px);
+        }
+
+        .topbar {
+          height: 70px;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .nav-right {
+          gap: 14px;
+        }
+
+        .nav-right .text-link {
+          display: none;
+        }
+
+        .nav-right .button {
+          min-height: 39px;
+          padding: 0 13px;
+          font-size: 12px;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          gap: 39px;
+          padding: 61px 0 61px;
+        }
+
+        .hero-copy {
+          padding-bottom: 0;
+        }
+
+        h1 {
+          max-width: 490px;
+          font-size: clamp(51px, 13vw, 69px);
+        }
+
+        .hero-description {
+          max-width: 400px;
+          font-size: 15px;
+        }
+
+        .social-proof {
+          margin-top: 29px;
+        }
+
+        .product-stage {
+          width: 100%;
+          padding: 0 7px 22px 0;
+        }
+
+        .app-window {
+          transform: rotate(0.7deg);
+        }
+
+        .window-content {
+          min-height: 350px;
+          grid-template-columns: 100px 1fr;
+        }
+
+        .workspace-heading {
+          flex-wrap: wrap;
+          gap: 9px;
+        }
+
+        .tiny-button {
+          white-space: nowrap;
+        }
+
+        .floating-note {
+          right: -6px;
+        }
+
+        .ticker-inner {
+          width: max-content;
+          min-height: 55px;
+          justify-content: flex-start;
+          gap: 20px;
+          font-size: 8px;
+        }
+
+        .section {
+          padding: 78px 0;
+        }
+
+        .section-intro {
+          margin-bottom: 30px;
+        }
+
+        .feature-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .feature-card {
+          min-height: 0;
+          padding: 21px;
+        }
+
+        .feature-icon {
+          margin-bottom: 21px;
+        }
+
+        .workflow {
+          grid-template-columns: 1fr;
+          gap: 31px;
+          padding: 70px 0 78px;
+        }
+
+        .cta-panel {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 22px;
+          min-height: 0;
+          padding: 34px 26px;
+        }
+
+        .cta-panel::after {
+          right: -170px;
+        }
+
+        .cta-panel::before {
+          right: -130px;
+        }
+
+        .footer {
+          align-items: flex-start;
+          flex-direction: column;
+          justify-content: center;
+          padding: 22px 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="shell topbar">
+      <a class="brand" href="#" aria-label="Forma home">
+        <span class="brand-mark" aria-hidden="true">f.</span>
+        forma
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#about">Our approach</a>
+      </nav>
+      <div class="nav-right">
+        <a class="text-link" href="#get-started">Log in</a>
+        <a class="button" href="#get-started">Get started <span class="arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="shell hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> A calmer way to create</div>
+          <h1 id="hero-title">Your design system, <em>in good form.</em></h1>
+          <p class="hero-description">
+            From first color to final component, bring your whole visual language together.
+            Make a system that feels like yours — and take it straight to Figma.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#get-started">Build your design system <span class="arrow" aria-hidden="true">↗</span></a>
+            <a class="quiet-link" href="#how-it-works">See how it works <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="social-proof">
+            <div class="avatars" aria-hidden="true">
+              <span class="avatar">AM</span>
+              <span class="avatar">JL</span>
+              <span class="avatar">RK</span>
+              <span class="avatar">TS</span>
+            </div>
+            <span>Made for people who care about <strong>the details.</strong></span>
+          </div>
+        </div>
+
+        <div class="product-stage" aria-label="Preview of the Forma design system builder">
+          <div class="stage-glow"></div>
+          <div class="app-window">
+            <div class="window-bar">
+              <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span>FORMA / STUDIO KIT</span>
+              <span>•••</span>
+            </div>
+            <div class="window-content">
+              <aside class="sidebar" aria-label="Design system sections">
+                <div class="sidebar-label">Your system</div>
+                <div class="side-item active"><span class="side-icon">◈</span> Foundations</div>
+                <div class="side-item"><span class="side-icon">Aa</span> Typography</div>
+                <div class="side-item"><span class="side-icon">◫</span> Components</div>
+                <div class="side-item"><span class="side-icon">⌗</span> Spacing</div>
+                <div class="side-item"><span class="side-icon">◉</span> Effects</div>
+              </aside>
+              <div class="workspace">
+                <div class="workspace-heading">
+                  <div>
+                    <h3>Foundations</h3>
+                    <p>Your visual language starts here.</p>
+                  </div>
+                  <span class="tiny-button">Export to Figma ↗</span>
+                </div>
+                <div class="palette-label">Color palette</div>
+                <div class="swatches">
+                  <div class="swatch"><div class="swatch-color" style="background:#304c38"></div><span>Forest</span></div>
+                  <div class="swatch"><div class="swatch-color" style="background:#d7f26a"></div><span>Citron</span></div>
+                  <div class="swatch"><div class="swatch-color" style="background:#f3e8d8"></div><span>Oat</span></div>
+                  <div class="swatch"><div class="swatch-color" style="background:#d7ddd2"></div><span>Sage</span></div>
+                  <div class="swatch"><div class="swatch-color" style="background:#f5c2ad"></div><span>Clay</span></div>
+                </div>
+                <div class="components-heading"><span>Preview components</span><span>See all →</span></div>
+                <div class="component-preview">
+                  <div class="preview-card">
+                    <div class="preview-pill"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                    <span class="preview-button">Get started ↗</span>
+                  </div>
+                  <div class="preview-card type-sample">
+                    <strong>Good form.</strong>
+                    <span>Heading / Manrope 600</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="floating-note">
+            <div class="figma-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div><strong>Figma-ready</strong><small>One click. Your whole system.</small></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="ticker" aria-label="Design system building blocks">
+        <div class="shell ticker-inner">
+          <span>Made for the details</span><span class="star" aria-hidden="true">✳</span>
+          <span>Color that connects</span><span class="star" aria-hidden="true">✳</span>
+          <span>Components that click</span><span class="star" aria-hidden="true">✳</span>
+          <span>Figma, meet your new system</span>
+        </div>
+      </div>
+
+      <section class="shell section" id="features" aria-labelledby="features-title">
+        <div class="section-intro">
+          <div class="section-kicker">Everything in its place</div>
+          <h2 id="features-title">All the pieces.<br />One lovely system.</h2>
+          <p>
+            No blank-canvas panic. Start with the building blocks every project needs,
+            then make each one your own.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">◉</div>
+            <h3>Colors with a point of view</h3>
+            <p>Create a palette that feels cohesive, stays accessible, and works beautifully across every screen.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">Aa</div>
+            <h3>Type that does the talking</h3>
+            <p>Set a type scale and pair fonts with confidence. Your hierarchy is already figured out.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">▦</div>
+            <h3>Components, all connected</h3>
+            <p>Build a consistent set of UI essentials with tokens that keep everything in sync.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell workflow" id="how-it-works" aria-labelledby="workflow-title">
+        <div class="section-intro">
+          <div class="section-kicker">Thoughtfully simple</div>
+          <h2 id="workflow-title">From a few ideas to a whole system.</h2>
+          <p>
+            A little guidance goes a long way. Shape your foundations, see them come together,
+            and keep creating in the tools you already love.
+          </p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <span class="step-number">01</span>
+            <div><h3>Tell us what you’re making</h3><p>Choose a starting point that fits your project and the feeling you want to create.</p></div>
+          </article>
+          <article class="step">
+            <span class="step-number">02</span>
+            <div><h3>Make it yours</h3><p>Fine-tune colors, type, spacing, and components in one clear, visual workspace.</p></div>
+          </article>
+          <article class="step">
+            <span class="step-number">03</span>
+            <div><h3>Take it into Figma</h3><p>Bring your system into your workflow and keep the good ideas moving.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell" id="get-started" aria-labelledby="cta-title">
+        <div class="cta-panel">
+          <div class="cta-copy">
+            <div class="section-kicker">Start with a little clarity</div>
+            <h2 id="cta-title">Your next project deserves a good foundation.</h2>
+            <p>Make something consistent, considered, and completely yours.</p>
+          </div>
+          <a class="button" href="mailto:hello@forma.design?subject=I%27d%20love%20to%20try%20Forma">Get early access <span class="arrow" aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer" id="about">
+      <a class="brand" href="#" aria-label="Forma home"><span class="brand-mark" aria-hidden="true">f.</span>forma</a>
+      <span>A little more intention in every interface.</span>
+      <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="mailto:hello@forma.design">Say hello</a>
+      </div>
+      <span>© 2026 Forma</span>
+    </footer>
+  </body>
+</html>
