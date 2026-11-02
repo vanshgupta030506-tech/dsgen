@@ -8,11 +8,26 @@ tokens and components, then bring their system into Figma.
 The sign-in flow uses Firebase Authentication with Google and stores the signed-in
 user's display name, email, photo URL, and update timestamp at
 `users/{uid}` in Firebase Realtime Database. The web app configuration in
-`index.html` is public client configuration; do not put service-account keys or
-other private credentials in the page.
+`index.html`, including its Firebase API key, is public client configuration.
+Firebase documents these keys as public project identifiers, not credentials
+that authorize database access. Google sign-in needs the configuration in the
+browser, so moving it to another frontend file or a Vercel environment variable
+would not make it secret. Never put service-account keys, private keys, or other
+server credentials in the page.
 
-The Realtime Database must enforce per-user access. In Firebase Console, open
-Realtime Database → Rules and publish rules equivalent to:
+### Lock down the Firebase project
+
+1. In Google Cloud Console → APIs & Services → Credentials, find the
+   Firebase-provisioned browser key used by this app. Verify its API restrictions
+   allow only the Firebase APIs required by this project. Firebase normally
+   manages that allowlist; do not replace it with a guessed list, as that can
+   break sign-in or database access. Keep unrelated Google APIs off this key.
+2. If applying website (HTTP referrer) restrictions, allow only the domains you
+   use, such as `https://dsgen.vercel.app/*` and (for local development)
+   `http://localhost:8000/*`. Add other Vercel preview domains only if you
+   actually use them. Referrer restrictions limit where the key is used; they
+   do not authorize or protect database data.
+3. In Firebase Console → Realtime Database → Rules, publish rules equivalent to:
 
 ```json
 {
@@ -27,11 +42,22 @@ Realtime Database → Rules and publish rules equivalent to:
 }
 ```
 
-These rules let each signed-in user read or update only their own profile. Do not
-use public read/write rules.
+These rules let each signed-in user read or update only their own profile. Check
+that no broader root-level rule grants public read/write access; broader rules
+override narrower ones. Do not use public read/write rules.
+
+4. Configure Firebase App Check for the web app and Realtime Database. Start in
+   monitoring mode, integrate the selected web provider in the client, verify
+   legitimate requests, then enforce it in Firebase Console. Enforcing before
+   the client is configured can block the app.
 
 In Firebase Authentication, enable Google as a sign-in provider and add the
 production domain to Authorized domains. To test locally, add `localhost` there.
+
+Firebase documents its API key guidance at
+[Firebase API keys](https://firebase.google.com/docs/projects/api-keys), and
+Realtime Database authorization at
+[Database security rules](https://firebase.google.com/docs/database/security).
 
 ## Run locally
 
