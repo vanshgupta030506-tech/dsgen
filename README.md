@@ -43,18 +43,20 @@ JavaScript origin `https://dsgen.vercel.app`. Add `http://localhost:8000` as an
 origin when testing locally. In Firebase Authentication, enable Google and add
 the production domain and `localhost` to Authorized domains.
 
-Because only the server uses Firebase Admin, Realtime Database rules should deny
-all direct client access. Admin SDK operations run with server credentials and
-bypass these rules:
+Because only the server uses Firebase Admin, Realtime Database rules deny all
+direct client access. The rules are stored in `database.rules.json`; Admin SDK
+operations run with server credentials and bypass these rules:
 
-```json
-{
-  "rules": {
-    ".read": false,
-    ".write": false
-  }
-}
+Publish them from Firebase Console → Realtime Database → Rules, or deploy this
+file with Firebase CLI after authenticating the CLI to the correct Firebase
+project:
+
+```sh
+npx firebase-tools deploy --only database --project dsgen-8cf88
 ```
+
+Verify the rules are published in the Firebase Console. The Vercel deploy does
+not automatically publish Firebase Realtime Database rules.
 
 ### Run locally
 
